@@ -11,12 +11,14 @@ def generate_launch_description():
     home_dir = os.path.expanduser('~')
     ghost_ros_base_dir = os.path.join(home_dir, "VEXU_GHOST", "ghost_ros")
 
+    """
     rplidar_node = Node(
         package='rplidar_ros2',
         executable='rplidar_scan_publisher',
         name='rplidar_scan_publisher',
         parameters=[{"frame_id": "lidar_link"}]
     )
+    """
 
     serial_node = Node(
         package='ghost_ros',
@@ -26,6 +28,7 @@ def generate_launch_description():
         parameters=[ghost_ros_base_dir + "/config/ghost_serial_config.yaml"]
     )
 
+    """
     estimator_node = Node(
         package='ghost_ros',
         executable='ghost_estimator_node',
@@ -33,6 +36,7 @@ def generate_launch_description():
         output='screen',
         parameters=[ghost_ros_base_dir + "/config/ghost_estimator_config.yaml"]
     )
+    """
 
     state_machine_node = Node(
         package='ghost_ros',
@@ -42,17 +46,19 @@ def generate_launch_description():
         parameters=[ghost_ros_base_dir + "/config/ghost_state_machine_config.yaml"]
     )
 
+    """
     foxglove_diagnostics_node = Node(
         package='ghost_ros',
         executable='foxglove_diagnostics_node',
         name='foxglove_diagnostics_node',
         parameters=[ghost_ros_base_dir + "/config/foxglove_diagnostics_config.yaml"]
     )
+    """
 
     return LaunchDescription([
-        foxglove_diagnostics_node,
+        #foxglove_diagnostics_node,
         serial_node,
-        estimator_node,
+        #estimator_node,
         state_machine_node,
-        rplidar_node,
+        #rplidar_node,
     ])
