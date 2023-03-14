@@ -7,7 +7,7 @@ sudo apt-get install -y ros-foxy-rplidar-ros  ros-foxy-realsense2*
 echo "Building yaml-cpp from source in ~/ghost_deps"
 cd ~/
 mkdir ghost_deps && cd ghost_deps
-git clone git@github.com:jbeder/yaml-cpp.git
+git clone https://github.com/jbeder/yaml-cpp.git
 cd yaml-cpp
 mkdir build
 cd build
