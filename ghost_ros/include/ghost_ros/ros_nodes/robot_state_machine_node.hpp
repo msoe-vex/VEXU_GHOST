@@ -48,6 +48,8 @@ namespace ghost_ros
         void resetPose();
 
         void updateSwerveCommandsFromTwist(float angular_velocity, float x_velocity, float y_velocity);
+        void updateTankCommandsFromTwist(float left_y, float right_y);
+
         void updateSwerveVoltageCommandsFromTwist(float angular_velocity, float x_velocity, float y_velocity);
 
         void publishSwerveKinematicsVisualization(

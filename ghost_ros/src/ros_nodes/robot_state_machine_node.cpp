@@ -25,7 +25,7 @@ namespace ghost_ros
                                                      curr_joystick_msg_id_{0},
                                                      curr_comp_state_msg_id_{0},
                                                      r1_pressed_{false},
-                                                     teleop_mode{INTAKE_MODE},
+                                                     teleop_mode{INTAKE_MODE}
     {
         declare_parameter("max_linear_vel", 0.0);
         declare_parameter("max_steering_angular_vel", 0.0);
@@ -197,19 +197,23 @@ namespace ghost_ros
 
     void RobotStateMachineNode::teleop()
     {
-        updateSwerveCommandsFromTwist(
+        updateTankCommandsFromTwist(
+            curr_joystick_msg_->joystick_left_y,
+            curr_joystick_msg_->joystick_right_y
+        );
+
+        /*updateSwerveCommandsFromTwist(
             -curr_joystick_msg_->joystick_right_x,
             curr_joystick_msg_->joystick_left_y,
-            -curr_joystick_msg_->joystick_left_x);
+            -curr_joystick_msg_->joystick_left_x);*/
 
         // Intake Control
-        if(curr_joystick_msg_->joystick_btn_r2){
+        /*if(curr_joystick_msg_->joystick_btn_r2){
             float intake_cmd = 750;
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].desired_velocity = intake_cmd;
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].desired_voltage = 1.0;
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].active = true;
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].current_limit = 2500;
-            
         }
         else if(curr_joystick_msg_->joystick_btn_down){
             float intake_cmd = -750;
@@ -217,11 +221,10 @@ namespace ghost_ros
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].desired_voltage = -1.0;
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].active = true;
             actuator_cmd_msg_.motor_commands[ghost_v5_config::INTAKE_MOTOR].current_limit = 2500;
-        }
-
+        }*/
 
         // Toggle shooter mode
-        if(curr_joystick_msg_->joystick_btn_r1 && !r1_pressed_){
+        /*if(curr_joystick_msg_->joystick_btn_r1 && !r1_pressed_){
             if(teleop_mode == INTAKE_MODE){
                 teleop_mode = SHOOTER_MODE;
             }
@@ -296,6 +299,68 @@ namespace ghost_ros
                 // actuator_cmd_msg_.motor_commands[ghost_v5_config::SHOOTER_LEFT_MOTOR].active = false;
                 // actuator_cmd_msg_.motor_commands[ghost_v5_config::SHOOTER_RIGHT_MOTOR].active = false;
             break;
+        }*/
+    }
+    
+    void RobotStateMachineNode::updateTankCommandsFromTwist(float left_y, float right_y)
+    {
+        // Update velocity commands
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].desired_velocity       = left_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].desired_velocity        = left_y;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].desired_velocity       = right_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].desired_velocity      = right_y;
+        
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].desired_velocity  = right_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].desired_velocity = right_y;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].desired_velocity   = left_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].desired_velocity  = left_y;
+
+        // Update voltage commands
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].desired_voltage        = left_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].desired_voltage         = left_y;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].desired_voltage       = right_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].desired_voltage        = right_y;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].desired_voltage   = right_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].desired_voltage  = right_y;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].desired_voltage    = left_y;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].desired_voltage   = left_y;
+
+        // Set Current Limits
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].current_limit          = 2500;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].current_limit           = 2500;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].current_limit         = 2500;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].current_limit          = 2500;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].current_limit     = 2500;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].current_limit    = 2500;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].current_limit      = 2500;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].current_limit     = 2500;
+
+        // Set motors to be active
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].active                 = true;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].active                  = true;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].active                = true;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].active                 = true;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].active            = true;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].active           = true;
+
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].active             = true;
+        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].active            = true;
+
+        // Set Motor Names and Device IDs
+        for (auto pair : ghost_v5_config::actuator_command_config){
+            int dev_id = pair.first;
+            actuator_cmd_msg_.motor_commands[dev_id].motor_name = ghost_v5_config::device_names.at(dev_id);
+            actuator_cmd_msg_.motor_commands[dev_id].device_id  = dev_id;
         }
     }
 
