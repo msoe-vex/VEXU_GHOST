@@ -5,5 +5,5 @@ ghost_serial_node:
     write_msg_start_seq: "msg"
     read_msg_start_seq: "sout"
     use_checksum: true
-    verbose: false
+    verbose: true
     using_reader_thread: true

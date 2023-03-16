@@ -21,6 +21,7 @@
 #include "ghost_ros/ros_nodes/ghost_estimator_node.hpp"
 #include "ghost_ros/ros_nodes/jetson_v5_serial_node.hpp"
 #include "ghost_ros/ros_nodes/robot_state_machine_node.hpp"
+#include "ghost_ros/ros_nodes/AutonManagerNode.h"
 
 using namespace std::literals::chrono_literals;
 
@@ -61,6 +62,9 @@ int main(int argc, char* argv[]){
     auto state_machine_node = std::make_shared<ghost_ros::RobotStateMachineNode>(
         globals::repo_base_dir + "ghost_ros/config/ghost_state_machine_config.yaml"
         );
+    
+    std::vector<Auton*> autons;
+    auto state_machine_node = std::make_shared<ghost_ros::RobotStateMachineNode>(autons);
     
     rclcpp::executors::MultiThreadedExecutor executor;
 

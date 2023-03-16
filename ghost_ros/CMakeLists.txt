@@ -175,6 +175,59 @@ install(TARGETS
 robot_state_machine_node
 DESTINATION lib/${PROJECT_NAME})
 
+###################
+##### Helpers #####
+###################
+add_library(helpers SHARED
+  src/helpers/auton/Auton.cpp
+  src/helpers/auton/AutonSequence.cpp
+  src/helpers/pathing/Path.cpp
+  src/helpers/pathing/PathManager.cpp
+  src/helpers/pathing/PathPoint.cpp
+  src/helpers/pathing/Waypoint.cpp
+  src/helpers/util/Logger.cpp
+  src/helpers/util/PID.cpp
+  src/helpers/util/Timer.cpp
+)
+target_include_directories(helpers
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_export_targets(helpers HAS_LIBRARY_TARGET)
+install(
+  TARGETS helpers 
+  EXPORT helpers 
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+  )
+
+############################
+#### Auton Manager Node ####
+############################
+add_executable(AutonManagerNode
+  src/ros_nodes/AutonManagerNode.cpp
+)
+ament_target_dependencies(AutonManagerNode
+  rclcpp
+  Eigen3
+  std_msgs
+  ghost_msgs
+  ghost_util
+)
+target_link_libraries(AutonManagerNode
+  v5_serial_msg_config
+  helpers
+)
+target_include_directories(AutonManagerNode
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+install(TARGETS
+AutonManagerNode
+DESTINATION lib/${PROJECT_NAME})
+
 #################
 #### Testing ####
 #################
