@@ -63,8 +63,9 @@ int main(int argc, char* argv[]){
         globals::repo_base_dir + "ghost_ros/config/ghost_state_machine_config.yaml"
         );
     
-    std::vector<Auton*> autons;
-    auto state_machine_node = std::make_shared<ghost_ros::RobotStateMachineNode>(autons);
+    auto state_machine_node = std::make_shared<rr_ros::AutonManagerNode>(
+        globals::repo_base_dir + "ghost_ros/config/ghost_autonmanager_config.yaml"
+    );
     
     rclcpp::executors::MultiThreadedExecutor executor;
 

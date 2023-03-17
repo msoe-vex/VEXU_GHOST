@@ -1,0 +1,4 @@
+ghost_autonmanager_node:
+  ros__parameters:
+    auton_path_root: "/usd/paths/"
+    auton_path_default: "/usd/paths/paths.json"

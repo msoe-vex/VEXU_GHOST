@@ -2,11 +2,15 @@
 
 #include "ghost_ros/helpers/pathing/PathManager.h"
 #include "ghost_ros/helpers/auton/Auton.h"
+
 #include "ghost_msgs/msg/ghost_robot_state.hpp"
 #include "ghost_msgs/msg/v5_competition_state.hpp"
+
 #include "rclcpp/rclcpp.hpp"
 
-//namespace rr_ros {
+#include "yaml-cpp/yaml.h"
+
+namespace rr_ros {
     enum robot_state_e
     {
         DISABLED = 0,
@@ -16,8 +20,8 @@
 
     class AutonManagerNode : public rclcpp::Node {
     private:
-        std::string pathJSON;
-
+        Auton* m_selected_auton;
+        std::vector<Auton*> m_autons;
 
         rclcpp::TimerBase::SharedPtr timer_;
         
@@ -33,17 +37,20 @@
         void periodic();
 
     public:
-        AutonManagerNode(std::vector<Auton*> autons);
-
-        Auton* selected_auton;
-        std::vector<Auton*> m_autons;
+        AutonManagerNode();
 
         void initialize();
+    
+        void setAutons(std::vector<Auton*> autons);
+
+        std::vector<Auton*> getAutons();
+    
+        void setSelectedAuton(int index);
         
-        void setPathsFile(std::string);
+        Auton* getSelectedAuton();
         
         void timer_callback();
 
         void autonPeriodic();
     };
-//}
+}
