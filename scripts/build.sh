@@ -73,6 +73,11 @@ if [[ $(pros --version) ]] 2> /dev/null; then
     echo 
     echo "---Building PROS Project---"
     pros make
+
+    echo
+    echo "---Uploading PROS Project---"
+    pros upload
+
 else
     echo "PROS not installed, skipping V5 Build"
 fi

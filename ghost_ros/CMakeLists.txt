@@ -34,6 +34,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -49,9 +51,9 @@ find_library(v5_serial_node REQUIRED)
 
 include_directories(include)
 
-###############################
-##### Robot Configuration #####
-###############################
+######################################
+##### Robot Serial Configuration #####
+######################################
 add_library(v5_serial_msg_config SHARED
   src/robot_config/v5_serial_msg_config.cpp
 )
@@ -63,6 +65,24 @@ ament_export_targets(v5_serial_msg_config HAS_LIBRARY_TARGET)
 install(
   TARGETS v5_serial_msg_config
   EXPORT v5_serial_msg_config
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+  )
+
+####################################
+##### Robot Port Configuration #####
+####################################
+add_library(v5_port_config INTERFACE)
+target_include_directories(v5_port_config
+  INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_export_targets(v5_port_config HAS_LIBRARY_TARGET)
+install(
+  TARGETS v5_port_config
+  EXPORT v5_port_config
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -181,6 +201,9 @@ DESTINATION lib/${PROJECT_NAME})
 add_library(helpers SHARED
   src/helpers/auton/Auton.cpp
   src/helpers/auton/AutonSequence.cpp
+  src/helpers/odometry/IOdometry.cpp
+  src/helpers/odometry/FollowerOdometry.cpp
+  src/helpers/odometry/TankOdometry.cpp
   src/helpers/pathing/Path.cpp
   src/helpers/pathing/PathManager.cpp
   src/helpers/pathing/PathPoint.cpp
@@ -228,6 +251,34 @@ install(TARGETS
 AutonManagerNode
 DESTINATION lib/${PROJECT_NAME})
 
+#######################
+#### Odometry Node ####
+#######################
+add_executable(OdometryNode
+  src/ros_nodes/OdometryNode.cpp
+)
+ament_target_dependencies(OdometryNode
+  rclcpp
+  Eigen3
+  std_msgs
+  nav_msgs
+  tf2
+  tf2_ros
+  ghost_msgs
+  ghost_util
+)
+target_link_libraries(OdometryNode
+  v5_serial_msg_config
+  helpers
+)
+target_include_directories(OdometryNode
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+install(TARGETS
+OdometryNode
+DESTINATION lib/${PROJECT_NAME})
+
 #################
 #### Testing ####
 #################
@@ -247,6 +298,7 @@ install(
 install(DIRECTORY
   launch
   config
+  description
   rviz
   DESTINATION share/${PROJECT_NAME})
 

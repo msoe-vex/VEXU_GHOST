@@ -140,19 +140,23 @@ void initialize()
     v5_globals::motors[v5_motor_id_enum::SHOOTER_RIGHT_MOTOR]      		= std::make_shared<ghost_v5::GhostMotor>(v5_motor_id_enum::SHOOTER_RIGHT_MOTOR,       		true, 	shooter_motor_config);
 
 	// Encoder Ports
-	v5_globals::encoders[v5_sensor_id_enum::STEERING_LEFT_ENCODER]	= std::make_shared<pros::Rotation>(v5_sensor_id_enum::STEERING_LEFT_ENCODER);
-    v5_globals::encoders[v5_sensor_id_enum::STEERING_RIGHT_ENCODER]	= std::make_shared<pros::Rotation>(v5_sensor_id_enum::STEERING_RIGHT_ENCODER);
-    v5_globals::encoders[v5_sensor_id_enum::STEERING_BACK_ENCODER]	= std::make_shared<pros::Rotation>(v5_sensor_id_enum::STEERING_BACK_ENCODER);
-	v5_globals::encoders[v5_sensor_id_enum::TURRET_ENCODER]			= std::make_shared<pros::Rotation>(v5_sensor_id_enum::TURRET_ENCODER);
+	v5_globals::encoders[v5_sensor_id_enum::STEERING_LEFT_ENCODER]	= std::make_shared<pros::IMU>(v5_sensor_id_enum::STEERING_LEFT_ENCODER);
+    v5_globals::encoders[v5_sensor_id_enum::STEERING_RIGHT_ENCODER]	= std::make_shared<pros::IMU>(v5_sensor_id_enum::STEERING_RIGHT_ENCODER);
+    v5_globals::encoders[v5_sensor_id_enum::STEERING_BACK_ENCODER]	= std::make_shared<pros::IMU>(v5_sensor_id_enum::STEERING_BACK_ENCODER);
+	v5_globals::encoders[v5_sensor_id_enum::IMU_SENSOR]			= std::make_shared<pros::IMU>(v5_sensor_id_enum::IMU_SENSOR);
 	
-	v5_globals::encoders[v5_sensor_id_enum::STEERING_LEFT_ENCODER]->reverse();
+	/*v5_globals::encoders[v5_sensor_id_enum::STEERING_LEFT_ENCODER]->reverse();
 	v5_globals::encoders[v5_sensor_id_enum::STEERING_RIGHT_ENCODER]->reverse();
-	v5_globals::encoders[v5_sensor_id_enum::STEERING_BACK_ENCODER]->reverse();
+	v5_globals::encoders[v5_sensor_id_enum::STEERING_BACK_ENCODER]->reverse();*/
+	v5_globals::encoders[v5_sensor_id_enum::STEERING_LEFT_ENCODER]->reset(true);
+	v5_globals::encoders[v5_sensor_id_enum::STEERING_RIGHT_ENCODER]->reset(true);
+	v5_globals::encoders[v5_sensor_id_enum::STEERING_BACK_ENCODER]->reset(true);
+	v5_globals::encoders[v5_sensor_id_enum::IMU_SENSOR]->reset(true);
 
 	v5_globals::encoders[v5_sensor_id_enum::STEERING_LEFT_ENCODER]->set_data_rate(5);
 	v5_globals::encoders[v5_sensor_id_enum::STEERING_RIGHT_ENCODER]->set_data_rate(5);
 	v5_globals::encoders[v5_sensor_id_enum::STEERING_BACK_ENCODER]->set_data_rate(5);
-	v5_globals::encoders[v5_sensor_id_enum::TURRET_ENCODER]->set_data_rate(5);
+	v5_globals::encoders[v5_sensor_id_enum::IMU_SENSOR]->set_data_rate(5);
 
 	zero_actuators();
 

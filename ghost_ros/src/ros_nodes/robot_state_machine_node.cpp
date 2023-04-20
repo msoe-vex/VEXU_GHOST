@@ -141,6 +141,16 @@ namespace ghost_ros
                 curr_robot_state_msg_ = msg;
                 updateController();
             });
+        
+        twist_sub_ = create_subscription<geometry_msgs::msg::Twist>(
+            "cmd_vel",
+            10,
+            [this](const geometry_msgs::msg::Twist::SharedPtr msg)
+            {
+                
+                twist_msg_ = msg;
+                updateController();
+            });
     }
 
     void RobotStateMachineNode::updateController()
@@ -158,7 +168,7 @@ namespace ghost_ros
             switch (curr_robot_state_)
             {
             case robot_state_e::AUTONOMOUS:
-
+                auton();
                 break;
 
             case robot_state_e::TELEOP:
@@ -194,12 +204,41 @@ namespace ghost_ros
 
         initial_pose_pub_->publish(msg);
     }
+    
+    void RobotStateMachineNode::auton()
+    {
+
+        // Convert joystick to robot twist command
+        if (twist_msg_) {
+            float angular_vel_z = twist_msg_->angular.z;
+            float linear_vel_x = twist_msg_->linear.x;
+            RCLCPP_INFO(get_logger(), "Angular: %f, Linear: %f", twist_msg_->angular.z, twist_msg_->linear.x);
+            
+            
+            float WHEEL_DIST = 29.7;
+
+            // https://answers.ros.org/question/209963/cmd_veltwist-transform-twist-message-into-left-and-right-motor-commands/
+            float speed_right = (angular_vel_z*WHEEL_DIST)/2 + linear_vel_x;
+            float speed_left = linear_vel_x*2-speed_right;
+            //RCLCPP_INFO(get_logger(), "Speed Left: %f, Speed Right: %f", speed_left, speed_right);
+
+            updateTankCommandsFromTwist(
+                speed_left,
+                speed_right,
+                false
+            );
+        } else {
+            RCLCPP_INFO(get_logger(), "Auton twist not inited");
+
+        }
+    }
 
     void RobotStateMachineNode::teleop()
     {
         updateTankCommandsFromTwist(
             curr_joystick_msg_->joystick_left_y,
-            curr_joystick_msg_->joystick_right_y
+            curr_joystick_msg_->joystick_right_y,
+            false
         );
 
         /*updateSwerveCommandsFromTwist(
@@ -242,7 +281,7 @@ namespace ghost_ros
             resetPose();
         }
 
-        float turret_angle = ghost_util::WrapAngle360(curr_encoder_msg_->encoders[ghost_v5_config::TURRET_ENCODER].angle_degrees);
+        float turret_angle = ghost_util::WrapAngle360(curr_encoder_msg_->encoders[ghost_v5_config::IMU_SENSOR].angle_degrees);
 
         switch(teleop_mode){
             case SHOOTER_MODE:
@@ -282,7 +321,7 @@ namespace ghost_ros
             case INTAKE_MODE:
                 actuator_cmd_msg_.motor_commands[ghost_v5_config::TURRET_MOTOR].desired_voltage = 
                     ghost_util::SmallestAngleDist(0.0, turret_angle) * turret_kp_ - 
-                    curr_encoder_msg_->encoders[ghost_v5_config::TURRET_ENCODER].velocity_rpm * turret_kd_;
+                    curr_encoder_msg_->encoders[ghost_v5_config::IMU_SENSOR].velocity_rpm * turret_kd_;
                 
                 // RCLCPP_INFO(get_logger(), "Turret Angle: %f", turret_angle);
 
@@ -302,33 +341,37 @@ namespace ghost_ros
         }*/
     }
     
-    void RobotStateMachineNode::updateTankCommandsFromTwist(float left_y, float right_y)
+    void RobotStateMachineNode::updateTankCommandsFromTwist(float left_y, float right_y, bool is_velocity)
     {
-        // Update velocity commands
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].desired_velocity       = left_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].desired_velocity        = left_y;
+        if (is_velocity) {
+            //RCLCPP_INFO(get_logger(), "Velocity left: %f, Velocity right: %f", left_y, right_y);
+            // Update velocity commands
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].desired_velocity       = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].desired_velocity        = left_y;
 
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].desired_velocity       = right_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].desired_velocity      = right_y;
-        
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].desired_velocity  = right_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].desired_velocity = right_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].desired_velocity       = right_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].desired_velocity      = right_y;
+            
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].desired_velocity  = right_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].desired_velocity = right_y;
 
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].desired_velocity   = left_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].desired_velocity  = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].desired_velocity   = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].desired_velocity  = left_y;
+        } else {
+            //RCLCPP_INFO(get_logger(), "Voltage left: %f, Voltage right: %f", left_y, right_y);
+            // Update voltage commands
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].desired_voltage        = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].desired_voltage         = left_y;
 
-        // Update voltage commands
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].desired_voltage        = left_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_BACK_MOTOR].desired_voltage         = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].desired_voltage       = right_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].desired_voltage        = right_y;
 
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_FRONT_MOTOR].desired_voltage       = right_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_RIGHT_BACK_MOTOR].desired_voltage        = right_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].desired_voltage   = right_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].desired_voltage  = right_y;
 
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_REAR_MOTOR].desired_voltage   = right_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_RIGHT_FRONT_MOTOR].desired_voltage  = right_y;
-
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].desired_voltage    = left_y;
-        actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].desired_voltage   = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_REAR_MOTOR].desired_voltage    = left_y;
+            actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_BACK_LEFT_FRONT_MOTOR].desired_voltage   = left_y;
+        }
 
         // Set Current Limits
         actuator_cmd_msg_.motor_commands[ghost_v5_config::DRIVE_LEFT_FRONT_MOTOR].current_limit          = 2500;

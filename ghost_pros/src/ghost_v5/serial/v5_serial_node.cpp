@@ -159,8 +159,8 @@ namespace ghost_v5
 		// Update V5 Sensors
 		for (auto &sensor_id : ghost_v5_config::sensor_update_sensor_config)
 		{
-			float position = ((float) v5_globals::encoders[sensor_id]->get_angle()) / 100.0;
-			float velocity = ((float) v5_globals::encoders[sensor_id]->get_velocity()) * 60.0 / 100.0 / 360.0; // Centidegrees -> RPM
+			float position = (float) v5_globals::encoders[sensor_id]->get_yaw();
+			float velocity = (float) v5_globals::encoders[sensor_id]->get_roll();
 
 			memcpy(sensor_update_msg_buffer + 4 * (buffer_32bit_index++), &position, 4);
 			memcpy(sensor_update_msg_buffer + 4 * (buffer_32bit_index++), &velocity, 4);

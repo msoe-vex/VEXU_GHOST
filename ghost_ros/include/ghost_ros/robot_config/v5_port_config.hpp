@@ -32,7 +32,7 @@ namespace ghost_v5_config
         STEERING_LEFT_ENCODER           = 2,
         STEERING_RIGHT_ENCODER          = 5,
         STEERING_BACK_ENCODER           = 12,
-        TURRET_ENCODER                  = 7
+        IMU_SENSOR                      = 20
     };
 
     enum v5_pneumatic_id_enum

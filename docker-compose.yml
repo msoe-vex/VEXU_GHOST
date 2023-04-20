@@ -1,0 +1,12 @@
+version: "3.5"
+
+services:
+  vexu_ghost:
+    container_name: vexu_ghost
+    image: vexu_ghost:latest
+    privileged: true
+    network_mode: "host"
+    working_dir: /root/VEXU_GHOST
+    volumes:
+      - './:/root/VEXU_GHOST'
+      - '/dev:/dev'

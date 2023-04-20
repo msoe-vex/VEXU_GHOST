@@ -24,6 +24,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/V5Joystick.msg"
   "msg/V5CompetitionState.msg"
   "msg/V5ActuatorCommand.msg"
+  "msg/V5TankDriveCommand.msg"
   "msg/V5SensorUpdate.msg"
   "msg/CVDisc.msg"
   DEPENDENCIES std_msgs

@@ -15,5 +15,5 @@ cmake -DYAML_BUILD_SHARED_LIBS=ON ..
 make -j
 sudo make install
 
-cd ~/VEXU_GHOST
-git submodule update --init
+#cd ~/VEXU_GHOST
+#git submodule update --init

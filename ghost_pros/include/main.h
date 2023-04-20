@@ -95,7 +95,7 @@ namespace v5_globals
     
     ///// MOTOR DEFINITIONS /////
     std::map<ghost_v5_config::v5_motor_id_enum, std::shared_ptr<ghost_v5::GhostMotor>> motors;
-    std::map<ghost_v5_config::v5_sensor_id_enum, std::shared_ptr<pros::Rotation>> encoders;
+    std::map<ghost_v5_config::v5_sensor_id_enum, std::shared_ptr<pros::IMU>> encoders;
 
 
     const pros::controller_analog_e_t joy_channels[4] = {

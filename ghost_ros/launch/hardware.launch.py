@@ -27,7 +27,15 @@ def generate_launch_description():
         output='screen',
         parameters=[ghost_ros_base_dir + "/config/ghost_serial_config.yaml"]
     )
+
+    odometry_node = Node(
+        package='ghost_ros',
+        executable='OdometryNode',
+        name='OdometryNode',
+        output='screen'
+    )
     
+    """
     autonmanager_node = Node(
         package='ghost_ros',
         executable='auton_manager_node',
@@ -35,6 +43,7 @@ def generate_launch_description():
         output='screen',
         parameters=[ghost_ros_base_dir + "/config/rr_autonmanager_config.yaml"]
     )
+    """
 
     """
     estimator_node = Node(
@@ -66,7 +75,8 @@ def generate_launch_description():
     return LaunchDescription([
         #foxglove_diagnostics_node,
         serial_node,
-        autonmanager_node,
+        odometry_node,
+        #autonmanager_node,
         #estimator_node,
         state_machine_node,
         #rplidar_node,

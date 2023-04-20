@@ -10,6 +10,7 @@
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "geometry_msgs/msg/point.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
 #include "ghost_msgs/msg/v5_competition_state.hpp"
@@ -44,11 +45,12 @@ namespace ghost_ros
 
     private:
         void updateController();
+        void auton();
         void teleop();
         void resetPose();
 
         void updateSwerveCommandsFromTwist(float angular_velocity, float x_velocity, float y_velocity);
-        void updateTankCommandsFromTwist(float left_y, float right_y);
+        void updateTankCommandsFromTwist(float left_y, float right_y, bool is_velocity);
 
         void updateSwerveVoltageCommandsFromTwist(float angular_velocity, float x_velocity, float y_velocity);
 
@@ -68,6 +70,8 @@ namespace ghost_ros
         rclcpp::Subscription<ghost_msgs::msg::V5Joystick>::SharedPtr v5_joystick_sub_;
         rclcpp::Subscription<ghost_msgs::msg::GhostRobotState>::SharedPtr robot_state_sub_;
         rclcpp::Subscription<ghost_msgs::msg::V5SensorUpdate>::SharedPtr v5_sensor_update_sub_;
+        
+        rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr twist_sub_;
 
         // Robot States
         robot_state_e curr_robot_state_;
@@ -78,6 +82,8 @@ namespace ghost_ros
         ghost_msgs::msg::V5SensorUpdate::SharedPtr curr_encoder_msg_;
         ghost_msgs::msg::V5CompetitionState::SharedPtr curr_comp_state_msg_;
         ghost_msgs::msg::GhostRobotState::SharedPtr curr_robot_state_msg_;
+        
+        geometry_msgs::msg::Twist::SharedPtr twist_msg_;
 
         uint32_t curr_robot_state_msg_id_;
         uint32_t curr_encoder_msg_id_;
