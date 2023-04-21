@@ -18,10 +18,10 @@ OdometryNode::OdometryNode() : Node("odom_node") {
         "/v5/sensor_update", 10, std::bind(&OdometryNode::imuDataCallback, this, _1));
 
     m_odom_x_subscription = this->create_subscription<std_msgs::msg::Int32>(
-        "/odom_x", 10, std::bind(&OdometryNode::odomXDataCallback, this, _1));
+        "/enc_x", 10, std::bind(&OdometryNode::odomXDataCallback, this, _1));
 
     m_odom_y_subscription = this->create_subscription<std_msgs::msg::Int32>(
-        "/odom_y", 10, std::bind(&OdometryNode::odomYDataCallback, this, _1));
+        "/enc_y", 10, std::bind(&OdometryNode::odomYDataCallback, this, _1));
     
     m_publisher = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
 
@@ -116,6 +116,8 @@ void OdometryNode::timer_callback(){
 }
 
 void OdometryNode::imuDataCallback(const ghost_msgs::msg::V5SensorUpdate::SharedPtr msg) {
+    float yawRadians = msg->encoders[ghost_v5_config::IMU_SENSOR].angle_degrees * -(M_PI/180);
+    RCLCPP_INFO_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Angle: " << yawRadians);
     Eigen::Rotation2Dd current_angle(msg->encoders[ghost_v5_config::IMU_SENSOR].angle_degrees * -(M_PI/180));
     this->m_imuYaw = current_angle;
 }
